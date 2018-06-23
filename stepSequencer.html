@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+	<title>MY-TRY</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+	<link rel="icon" type="image/png" sizes="174x174" href="./style/favicon.png">
+
+	<script src="./scripts/Tone.js"></script>
+	<script src="./scripts/jquery.min.js"></script>
+	<script src="./scripts/draggabilly.js"></script>
+
+	<script src="./scripts/StartAudioContext.js"></script>
+	<script src="./scripts/Interface.js"></script>
+	<script src="./scripts/NexusUI.js"></script>
+  <script src="./scripts/nexusUI.js"></script>
+
+	<link rel="stylesheet" type="text/css" href="./style/examples.css">
+
+	<script>
+		// jshint ignore: start
+	</script>
+
+</head>
+<body>
+	<style type="text/css">
+		canvas {
+			margin-top: 1px;
+		}
+	</style>
+	<div id="Content">
+		<canvas nx="matrix"></canvas>
+	</div>
+  <div id="target">
+
+	</div>
+	<script>
+
+  var toggle = new Nexus.Toggle('#target',{
+      'size': [40,1000],
+      'state': false
+  });
+  toggle.on('change',function(v) {
+  console.log(v);
+})
+  // var sequencer = new Nexus.Sequencer('#content',{
+  //  'size': [400,200],
+  //  'mode': 'toggle',
+  //  'rows': 5,
+  //  'columns': 10
+  // })
+		//setup a polyphonic sampler
+		var keys = new Tone.Players({
+      "kick" : "./audio/505/kick.[mp3|ogg]",
+      "snare":"./audio/505/snare.[mp3|ogg]",
+      "hh":"./audio/505/hh.[mp3|ogg]",
+      "hho":"./audio/505/hho.[mp3|ogg]",
+      "blip":"./audio/505/1.[wav]",
+      "blop":"./audio/505/2.[wav]",
+			"A" : "./audio/casio/A1.[mp3|ogg]",
+			"C#" : "./audio/casio/Cs2.[mp3|ogg]",
+			"E" : "./audio/casio/E2.[mp3|ogg]",
+			"F#" : "./audio/casio/Fs2.[mp3|ogg]"
+		}, {
+			"volume" : -10,
+			"fadeOut" : "64n",
+		}).toMaster();
+    ["F#", "E", "C#", "A","kick","snare","hh","hho","blip","blop"];
+		//the notes
+		var noteNames = ["F#", "E", "C#", "A","kick","snare","hh","hho","blip","blop"];
+
+		var loop = new Tone.Sequence(function(time, col){
+
+		var column = matrix1.matrix[col];
+
+			for (var i = 0; i < 10; i++){
+				if (column[i] === 1){
+					//slightly randomized velocities
+          console.log(column);
+					var vel = Math.random() * 0.5 + 0.5;
+					keys.get(noteNames[i]).start(time, 0, "64n", 0, vel);
+				}
+			}
+		}, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], "16n");
+
+		Tone.Transport.start();
+
+		// GUI //
+
+		  nx.onload = function(){
+  		nx.colorize("fill","#d6d4d4");
+      nx.colorize("border","black");
+      nx.colorize("accent","#000000");
+      matrix1.lineWidth=18;
+      matrix1.row = 10;
+			matrix1.col = 16;
+			matrix1.init();
+			matrix1.resize($("#Content").width(), 400);
+  console.log( matrix1.matrix );
+      matrix1.draw();
+		}
+    // Interface.sequencer({
+    //   'size': [400,200],
+    //   'mode': 'toggle',
+    //   'rows': 5,
+    //   'columns': 10
+    // });
+
+		Interface.Slider({
+			name : "BPM",
+			min : 80,
+			max : 200,
+			value : Tone.Transport.bpm.value,
+			drag : function(val){
+				Tone.Transport.bpm.value = val;
+			}
+		});
+
+		Interface.Button({
+
+			text : "Start",
+			activeText : "Stop",
+			type : "toggle",
+
+			key : 32, //spacebar
+			start : function(){
+				loop.start();
+
+			},
+			end : function(){
+				loop.stop();
+			},
+		});
+
+		//Interface.Loader();
+
+		$(window).on("resize", function(){
+			matrix1.resize($("#Content").width(), 400);
+			matrix1.draw();
+		});
+    // sequencer.on('change',function(v) {
+    //   console.log(v);
+    // })
+
+	</script>
+</body>
+</html>
